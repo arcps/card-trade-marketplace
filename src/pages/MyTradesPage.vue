@@ -1,7 +1,8 @@
 <template>
   <q-page class="q-pa-lg">
     <div class="q-gutter-lg q-mb-lg">
-      <div class="text-h4">Todas trocas</div>
+      <div class="text-h4">Minhas trocas</div>
+      <q-btn color="primary" label="Solicitar troca" @click="openCreateTradeDialog" />
     </div>
 
     <div v-if="loading" class="text-center q-my-lg">
@@ -9,20 +10,28 @@
     </div>
 
     <div v-else-if="trades.length === 0" class="text-center q-my-lg text-grey">
-      Nenhuma troca disponível
+      Nenhuma troca encontrada
     </div>
 
     <div v-else class="q-gutter-md">
       <q-card v-for="trade in trades" :key="trade.id" class="q-mb-md" bordered>
         <q-card-section class="bg-blue-grey-1">
           <div class="row items-center">
-            <div class="text-subtitle text-weight-medium">
-              Solicitada por: <strong>{{ trade.user.name }}</strong>
-            </div>
+            <div class="text-h6">Troca #{{ trade.id.slice(-8) }}</div>
             <q-space />
             <div class="text-caption text-grey-7">
               {{ formatDate(trade.createdAt) }}
             </div>
+            <q-btn
+              flat
+              round
+              dense
+              icon="delete"
+              color="negative"
+              size="sm"
+              class="q-ml-sm"
+              @click="confirmDeleteTrade(trade.id)"
+            />
           </div>
         </q-card-section>
 
@@ -32,7 +41,7 @@
           <div class="q-mb-lg">
             <div class="row items-center q-mb-md">
               <q-icon name="arrow_upward" color="positive" size="md" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-medium">Cartas oferecidas</div>
+              <div class="text-subtitle1 text-weight-medium">Cartas que você oferece</div>
             </div>
             <div class="row q-gutter-sm wrap">
               <div v-for="card in getOfferedCards(trade)" :key="card.id" class="col-auto">
@@ -64,7 +73,7 @@
           <div class="q-mb-lg">
             <div class="row items-center q-mb-md">
               <q-icon name="arrow_downward" color="info" size="md" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-medium">Cartas solicitadas</div>
+              <div class="text-subtitle1 text-weight-medium">Cartas que você solicita</div>
             </div>
             <div class="row q-gutter-sm wrap">
               <div v-for="card in getRequestedCards(trade)" :key="card.id" class="col-auto">
@@ -91,6 +100,17 @@
             </div>
           </div>
         </q-card-section>
+
+        <q-separator />
+
+        <q-card-section class="bg-grey-1">
+          <div class="row items-center">
+            <q-icon name="person" size="sm" class="q-mr-sm" />
+            <div class="text-caption">
+              Solicitada por: <strong>{{ trade.user.name }}</strong>
+            </div>
+          </div>
+        </q-card-section>
       </q-card>
 
       <div v-if="hasMore" class="flex justify-center q-mt-lg">
@@ -101,15 +121,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { getTrades } from 'src/services/api/trades';
+import { ref, onMounted, computed } from 'vue';
+import { useQuasar } from 'quasar';
+import { useAuthStore } from 'src/stores/auth';
+import { getTrades, deleteTrade } from 'src/services/api/trades';
+import CreateTradeDialog from 'src/components/dialogs/CreateTradeDialog.vue';
 import type { Trade } from 'src/services/api/trades';
 
-const trades = ref<Trade[]>([]);
+const $q = useQuasar();
+const authStore = useAuthStore();
+const allTrades = ref<Trade[]>([]);
 const currentPage = ref(1);
 const hasMore = ref(false);
 const loading = ref(false);
 const loadingMore = ref(false);
+
+const trades = computed(() => {
+  if (!authStore.user) return [];
+  return allTrades.value.filter((trade) => trade.userId === authStore.user?.id);
+});
 
 const fetchTrades = async (page: number = 1, append: boolean = false) => {
   if (append) {
@@ -123,9 +153,9 @@ const fetchTrades = async (page: number = 1, append: boolean = false) => {
     const newTrades = response.data.list;
 
     if (append) {
-      trades.value.push(...newTrades);
+      allTrades.value.push(...newTrades);
     } else {
-      trades.value = newTrades;
+      allTrades.value = newTrades;
     }
 
     hasMore.value = response.data.more;
@@ -144,6 +174,16 @@ const loadMoreTrades = () => {
   });
 };
 
+const openCreateTradeDialog = () => {
+  $q.dialog({
+    component: CreateTradeDialog,
+  }).onOk(() => {
+    fetchTrades(1, false).catch((error) => {
+      console.error('Error refreshing trades:', error);
+    });
+  });
+};
+
 const getOfferedCards = (trade: Trade) => {
   return trade.tradeCards.filter((tc) => tc.type === 'OFFERING').map((tc) => tc.card);
 };
@@ -154,6 +194,43 @@ const getRequestedCards = (trade: Trade) => {
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('pt-BR');
+};
+
+const confirmDeleteTrade = (tradeId: string) => {
+  $q.dialog({
+    title: 'Confirmar exclusão',
+    message: 'Tem certeza que deseja excluir esta troca? Esta ação não pode ser desfeita.',
+    cancel: {
+      label: 'Cancelar',
+      color: 'primary',
+      flat: true,
+    },
+    ok: {
+      label: 'Excluir',
+      color: 'negative',
+    },
+    persistent: true,
+  }).onOk(() => {
+    void deleteTradeById(tradeId);
+  });
+};
+
+const deleteTradeById = async (tradeId: string) => {
+  try {
+    await deleteTrade(tradeId);
+    $q.notify({
+      type: 'positive',
+      message: 'Troca excluída com sucesso!',
+    });
+    // Remove a trade da lista local
+    allTrades.value = allTrades.value.filter((trade) => trade.id !== tradeId);
+  } catch (error) {
+    console.error('Error deleting trade:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao excluir a troca. Tente novamente.',
+    });
+  }
 };
 
 onMounted(() => {

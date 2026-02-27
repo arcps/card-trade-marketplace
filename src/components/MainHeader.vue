@@ -15,7 +15,7 @@
 
       <q-space />
 
-      <div class="gt-sm">
+      <div class="gt-sm row items-center no-wrap">
         <q-btn
           v-for="link in links"
           :key="link.label"
@@ -25,15 +25,63 @@
           :label="link.label"
           :to="link.to"
         />
+
+        <q-separator vertical spaced v-if="links.length > 0" />
+
+        <template v-if="!authStore.isAuthenticated">
+          <q-btn stretch flat label="Entrar" to="/login" icon="login" />
+          <q-btn stretch flat label="Registrar" to="/register" icon="person_add" />
+        </template>
+
+        <q-btn-dropdown
+          v-else
+          stretch
+          flat
+          :label="authStore.user?.name || 'Minha conta'"
+          icon="account_circle"
+        >
+          <q-list>
+            <q-item clickable v-close-popup to="/my-cards">
+              <q-item-section avatar>
+                <q-icon name="style" />
+              </q-item-section>
+              <q-item-section>Minhas cartas</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup to="/my-trades">
+              <q-item-section avatar>
+                <q-icon name="swap_horiz" />
+              </q-item-section>
+              <q-item-section>Minhas trocas</q-item-section>
+            </q-item>
+            <q-separator />
+            <q-item clickable v-close-popup @click="onLogout">
+              <q-item-section avatar>
+                <q-icon name="logout" />
+              </q-item-section>
+              <q-item-section>Deslogar</q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
       </div>
     </q-toolbar>
   </q-header>
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from 'src/stores/auth';
+import { useRouter } from 'vue-router';
+
 defineProps<{
   links: { label: string; icon: string; to: string }[];
 }>();
 
 defineEmits(['toggleLeftDrawer']);
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+async function onLogout() {
+  authStore.logout();
+  await router.push('/login');
+}
 </script>
