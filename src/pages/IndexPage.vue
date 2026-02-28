@@ -4,7 +4,7 @@
       <div class="text-h4">Todas trocas</div>
     </div>
 
-    <div v-if="loading" class="text-center q-my-lg">
+    <div v-if="isLoading" class="text-center q-my-lg">
       <q-spinner color="primary" size="3em" />
     </div>
 
@@ -101,47 +101,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed } from 'vue';
+import { useQuery } from '@tanstack/vue-query';
 import { getTrades } from 'src/services/api/trades';
 import type { Trade } from 'src/services/api/trades';
 
-const trades = ref<Trade[]>([]);
 const currentPage = ref(1);
-const hasMore = ref(false);
-const loading = ref(false);
-const loadingMore = ref(false);
+const rpp = 10;
+const allTrades = ref<Trade[]>([]);
 
-const fetchTrades = async (page: number = 1, append: boolean = false) => {
-  if (append) {
-    loadingMore.value = true;
-  } else {
-    loading.value = true;
-  }
+const queryKey = computed(() => ['trades', currentPage.value, rpp]);
 
-  try {
-    const response = await getTrades(page, 10);
-    const newTrades = response.data.list;
-
-    if (append) {
-      trades.value.push(...newTrades);
+const { isLoading } = useQuery({
+  queryKey,
+  queryFn: async () => {
+    const response = await getTrades(currentPage.value, rpp);
+    if (currentPage.value === 1) {
+      allTrades.value = response.data.list;
     } else {
-      trades.value = newTrades;
+      allTrades.value.push(...response.data.list);
     }
-
     hasMore.value = response.data.more;
-    currentPage.value = page;
-  } catch (error) {
-    console.error('Error fetching trades:', error);
-  } finally {
-    loading.value = false;
-    loadingMore.value = false;
-  }
-};
+    return response.data;
+  },
+});
+
+const hasMore = ref(false);
+
+const trades = computed(() => allTrades.value);
 
 const loadMoreTrades = () => {
-  fetchTrades(currentPage.value + 1, true).catch((error) => {
-    console.error('Error loading more trades:', error);
-  });
+  currentPage.value += 1;
 };
 
 const getOfferedCards = (trade: Trade) => {
@@ -155,12 +145,6 @@ const getRequestedCards = (trade: Trade) => {
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('pt-BR');
 };
-
-onMounted(() => {
-  fetchTrades().catch((error) => {
-    console.error('Error loading trades:', error);
-  });
-});
 </script>
 
 <style scoped>

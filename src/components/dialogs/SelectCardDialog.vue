@@ -8,7 +8,7 @@
       </q-card-section>
 
       <q-card-section style="max-height: calc(90vh - 100px); overflow-y: auto">
-        <q-linear-progress v-if="loading" indeterminate color="primary" />
+        <q-linear-progress v-if="isLoading" indeterminate color="primary" />
         <div v-else>
           <q-list>
             <q-item
@@ -63,8 +63,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useDialogPluginComponent } from 'quasar';
+import { useQuery } from '@tanstack/vue-query';
 import { getAvailableCards } from 'src/services/api/cards';
 import type { Card } from 'src/models/cards';
 
@@ -74,32 +75,24 @@ defineEmits<{
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
-const availableCards = ref<Card[]>([]);
 const currentPage = ref(1);
-const hasMore = ref(false);
-const loading = ref(false);
 const rpp = 10;
 
-const loadCards = async (page: number = 1) => {
-  loading.value = true;
-  try {
-    const response = await getAvailableCards(page, rpp);
-    availableCards.value = response.data.list;
-    hasMore.value = response.data.more;
-    currentPage.value = page;
-  } catch (error) {
-    console.error('Error loading available cards:', error);
-  } finally {
-    loading.value = false;
-  }
+const queryKey = computed(() => ['availableCards', currentPage.value, rpp]);
+
+const { data, isLoading } = useQuery({
+  queryKey,
+  queryFn: () => getAvailableCards(currentPage.value, rpp),
+});
+
+const availableCards = computed(() => data.value?.data?.list ?? []);
+const hasMore = computed(() => data.value?.data?.more ?? false);
+
+const loadCards = (page: number) => {
+  currentPage.value = page;
 };
 
 const selectCard = (card: Card) => {
   onDialogOK(card);
 };
-
-// Load cards on mount
-onMounted(async () => {
-  await loadCards(1);
-});
 </script>

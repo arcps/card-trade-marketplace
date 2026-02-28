@@ -43,13 +43,22 @@
                 :columns="'col-xs-12 col-sm-3 col-md-2'"
                 @card-click="toggleRequestedCard"
               />
-              <div v-if="hasMoreSystemCards" class="flex justify-center q-mt-lg">
+              <div class="row q-gutter-sm q-mx-none q-mt-lg justify-center">
                 <q-btn
+                  v-if="systemCardsPage > 1"
                   flat
                   color="primary"
-                  label="Carregar mais"
+                  label="Anterior"
                   size="sm"
-                  @click="loadMoreSystemCards"
+                  @click="loadCards(systemCardsPage - 1)"
+                />
+                <q-btn
+                  v-if="hasMoreSystemCards"
+                  flat
+                  color="primary"
+                  label="Próxima"
+                  size="sm"
+                  @click="loadCards(systemCardsPage + 1)"
                 />
               </div>
             </div>
@@ -71,8 +80,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useDialogPluginComponent, useQuasar } from 'quasar';
+import { useQuery } from '@tanstack/vue-query';
 import { getMyCards, getAvailableCards } from 'src/services/api/cards';
 import { createTrade } from 'src/services/api/trades';
 import CardList from 'src/components/CardList.vue';
@@ -86,48 +96,30 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 const $q = useQuasar();
 
 const activeTab = ref('my-cards');
-const myCards = ref<Card[]>([]);
-const systemCards = ref<Card[]>([]);
 const selectedOfferedCards = ref<string[]>([]);
 const selectedRequestedCards = ref<string[]>([]);
-const loadingSystemCards = ref(false);
 const systemCardsPage = ref(1);
-const hasMoreSystemCards = ref(false);
+const rpp = 10;
 
-const loadMyCards = async () => {
-  try {
-    const response = await getMyCards();
-    myCards.value = response.data;
-  } catch (error) {
-    console.error('Error loading my cards:', error);
-  }
-};
+const { data: myCardsResponse } = useQuery({
+  queryKey: ['myCards'],
+  queryFn: () => getMyCards(),
+  staleTime: 30 * 1000,
+});
 
-const loadSystemCards = async (page: number = 1, append: boolean = false) => {
-  loadingSystemCards.value = true;
-  try {
-    const response = await getAvailableCards(page, 10);
-    const newCards = response.data.list;
+const myCards = computed(() => myCardsResponse.value?.data ?? []);
 
-    if (append) {
-      systemCards.value.push(...newCards);
-    } else {
-      systemCards.value = newCards;
-    }
+const systemCardsQueryKey = computed(() => ['availableCards', systemCardsPage.value, rpp]);
+const { data: systemCardsResponse, isLoading: loadingSystemCards } = useQuery({
+  queryKey: systemCardsQueryKey,
+  queryFn: () => getAvailableCards(systemCardsPage.value, rpp),
+});
 
-    hasMoreSystemCards.value = response.data.more;
-    systemCardsPage.value = page;
-  } catch (error) {
-    console.error('Error loading system cards:', error);
-  } finally {
-    loadingSystemCards.value = false;
-  }
-};
+const systemCards = computed(() => systemCardsResponse.value?.data?.list ?? []);
+const hasMoreSystemCards = computed(() => systemCardsResponse.value?.data?.more ?? false);
 
-const loadMoreSystemCards = () => {
-  loadSystemCards(systemCardsPage.value + 1, true).catch((error) => {
-    console.error('Error loading more system cards:', error);
-  });
+const loadCards = (page: number) => {
+  systemCardsPage.value = page;
 };
 
 const toggleOfferedCard = (card: Card) => {
@@ -180,13 +172,4 @@ const submitTrade = async () => {
     });
   }
 };
-
-onMounted(() => {
-  loadMyCards().catch((error) => {
-    console.error('Error loading my cards:', error);
-  });
-  loadSystemCards().catch((error) => {
-    console.error('Error loading system cards:', error);
-  });
-});
 </script>
