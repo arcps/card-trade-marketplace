@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-pa-lg">
     <div class="q-gutter-lg q-mb-lg">
-      <div class="text-h4">Todas trocas</div>
+      <div class="text-h4">{{ t('labels.allTrades') }}</div>
     </div>
 
     <div v-if="isLoading" class="text-center q-my-lg">
@@ -9,7 +9,7 @@
     </div>
 
     <div v-else-if="trades.length === 0" class="text-center q-my-lg text-grey">
-      Nenhuma troca disponível
+      {{ t('status.noTrades') }}
     </div>
 
     <div v-else class="q-gutter-md">
@@ -17,7 +17,7 @@
         <q-card-section class="bg-blue-grey-1">
           <div class="row items-center">
             <div class="text-subtitle text-weight-medium">
-              Solicitada por: <strong>{{ trade.user.name }}</strong>
+              {{ t('labels.tradeBy') }}: <strong>{{ trade.user.name }}</strong>
             </div>
             <q-space />
             <div class="text-caption text-grey-7">
@@ -32,7 +32,7 @@
           <div class="q-mb-lg">
             <div class="row items-center q-mb-md">
               <q-icon name="arrow_upward" color="positive" size="md" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-medium">Cartas oferecidas</div>
+              <div class="text-subtitle1 text-weight-medium">{{ t('labels.offeredCards') }}</div>
             </div>
             <div class="row q-gutter-sm wrap">
               <div v-for="card in getOfferedCards(trade)" :key="card.id" class="col-auto">
@@ -64,7 +64,7 @@
           <div class="q-mb-lg">
             <div class="row items-center q-mb-md">
               <q-icon name="arrow_downward" color="info" size="md" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-medium">Cartas solicitadas</div>
+              <div class="text-subtitle1 text-weight-medium">{{ t('labels.requestedCards') }}</div>
             </div>
             <div class="row q-gutter-sm wrap">
               <div v-for="card in getRequestedCards(trade)" :key="card.id" class="col-auto">
@@ -105,6 +105,9 @@ import { ref, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { getTrades } from 'src/services/api/trades';
 import type { Trade } from 'src/services/api/trades';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const currentPage = ref(1);
 const rpp = 10;

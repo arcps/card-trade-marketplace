@@ -45,24 +45,25 @@
               <q-item-section avatar>
                 <q-icon name="style" />
               </q-item-section>
-              <q-item-section>Minhas cartas</q-item-section>
+              <q-item-section>{{ t('nav.myCards') }}</q-item-section>
             </q-item>
             <q-item clickable v-close-popup to="/my-trades">
               <q-item-section avatar>
                 <q-icon name="swap_horiz" />
               </q-item-section>
-              <q-item-section>Minhas trocas</q-item-section>
+              <q-item-section>{{ t('nav.myTrades') }}</q-item-section>
             </q-item>
             <q-separator />
             <q-item clickable v-close-popup @click="onLogout">
               <q-item-section avatar>
                 <q-icon name="logout" />
               </q-item-section>
-              <q-item-section>Deslogar</q-item-section>
+              <q-item-section>{{ t('nav.logout') }}</q-item-section>
             </q-item>
           </q-list>
         </q-btn-dropdown>
       </div>
+      <LanguageSelector />
     </q-toolbar>
   </q-header>
 </template>
@@ -70,6 +71,10 @@
 <script setup lang="ts">
 import { useAuthStore } from 'src/stores/auth';
 import { useRouter } from 'vue-router';
+import LanguageSelector from 'components/LanguageSelector.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps<{
   links: { label: string; icon: string; to: string }[];

@@ -1,8 +1,8 @@
 <template>
   <q-page class="q-pa-lg">
     <div class="q-gutter-lg q-mb-lg">
-      <div class="text-h4">Minhas trocas</div>
-      <q-btn color="primary" label="Solicitar troca" @click="openCreateTradeDialog" />
+      <div class="text-h4">{{ t('nav.myTrades') }}</div>
+      <q-btn color="primary" :label="t('buttons.createTrade')" @click="openCreateTradeDialog" />
     </div>
 
     <div v-if="loading" class="text-center q-my-lg">
@@ -10,14 +10,14 @@
     </div>
 
     <div v-else-if="trades.length === 0" class="text-center q-my-lg text-grey">
-      Nenhuma troca encontrada
+      {{ t('status.noTrades') }}
     </div>
 
     <div v-else class="q-gutter-md">
       <q-card v-for="trade in trades" :key="trade.id" class="q-mb-md" bordered>
         <q-card-section class="bg-blue-grey-1">
           <div class="row items-center">
-            <div class="text-h6">Troca #{{ trade.id.slice(-8) }}</div>
+            <div class="text-h6">{{ t('labels.tradeId') }} #{{ trade.id.slice(-8) }}</div>
             <q-space />
             <div class="text-caption text-grey-7">
               {{ formatDate(trade.createdAt) }}
@@ -41,7 +41,7 @@
           <div class="q-mb-lg">
             <div class="row items-center q-mb-md">
               <q-icon name="arrow_upward" color="positive" size="md" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-medium">Cartas que você oferece</div>
+              <div class="text-subtitle1 text-weight-medium">{{ t('labels.offeredCards') }}</div>
             </div>
             <div class="row q-gutter-sm wrap">
               <div v-for="card in getOfferedCards(trade)" :key="card.id" class="col-auto">
@@ -73,7 +73,7 @@
           <div class="q-mb-lg">
             <div class="row items-center q-mb-md">
               <q-icon name="arrow_downward" color="info" size="md" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-medium">Cartas que você solicita</div>
+              <div class="text-subtitle1 text-weight-medium">{{ t('labels.requestedCards') }}</div>
             </div>
             <div class="row q-gutter-sm wrap">
               <div v-for="card in getRequestedCards(trade)" :key="card.id" class="col-auto">
@@ -107,14 +107,14 @@
           <div class="row items-center">
             <q-icon name="person" size="sm" class="q-mr-sm" />
             <div class="text-caption">
-              Solicitada por: <strong>{{ trade.user.name }}</strong>
+              {{ t('labels.tradeBy') }}: <strong>{{ trade.user.name }}</strong>
             </div>
           </div>
         </q-card-section>
       </q-card>
 
       <div v-if="hasMore" class="flex justify-center q-mt-lg">
-        <q-btn flat color="primary" label="Carregar mais" @click="loadMoreTrades" />
+        <q-btn flat color="primary" :label="t('buttons.loadMore')" @click="loadMoreTrades" />
       </div>
     </div>
   </q-page>
@@ -127,6 +127,9 @@ import { useAuthStore } from 'src/stores/auth';
 import { getTrades, deleteTrade } from 'src/services/api/trades';
 import CreateTradeDialog from 'src/components/dialogs/CreateTradeDialog.vue';
 import type { Trade } from 'src/services/api/trades';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const $q = useQuasar();
 const authStore = useAuthStore();
@@ -198,15 +201,15 @@ const formatDate = (dateString: string) => {
 
 const confirmDeleteTrade = (tradeId: string) => {
   $q.dialog({
-    title: 'Confirmar exclusão',
-    message: 'Tem certeza que deseja excluir esta troca? Esta ação não pode ser desfeita.',
+    title: t('dialogs.confirmDelete'),
+    message: t('dialogs.deleteMessage'),
     cancel: {
-      label: 'Cancelar',
+      label: t('buttons.cancel'),
       color: 'primary',
       flat: true,
     },
     ok: {
-      label: 'Excluir',
+      label: t('buttons.delete'),
       color: 'negative',
     },
     persistent: true,

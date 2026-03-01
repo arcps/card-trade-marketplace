@@ -22,8 +22,13 @@ declare module 'vue-i18n' {
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 
 export default defineBoot(({ app }) => {
+  // Detect browser language or use saved preference
+  const savedLocale = localStorage.getItem('locale');
+  const browserLocale = navigator.language;
+  const defaultLocale = savedLocale || (browserLocale.startsWith('pt') ? 'pt-BR' : 'en-US');
+
   const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: 'en-US',
+    locale: defaultLocale,
     legacy: false,
     messages,
   });

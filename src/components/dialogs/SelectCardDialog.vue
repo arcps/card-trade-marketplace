@@ -2,7 +2,7 @@
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <q-card style="width: 90vw; max-width: 600px; max-height: 90vh">
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">Selecionar carta</div>
+        <div class="text-h6">{{ t('dialogs.selectCard') }}</div>
         <q-space />
         <q-btn icon="close" flat round dense @click="onDialogCancel" />
       </q-card-section>
@@ -43,7 +43,7 @@
               v-if="currentPage > 1"
               flat
               color="primary"
-              label="Anterior"
+              :label="t('buttons.previous')"
               size="sm"
               @click="loadCards(currentPage - 1)"
             />
@@ -51,7 +51,7 @@
               v-if="hasMore"
               flat
               color="primary"
-              label="Próxima"
+              :label="t('buttons.next')"
               size="sm"
               @click="loadCards(currentPage + 1)"
             />
@@ -68,6 +68,9 @@ import { useDialogPluginComponent } from 'quasar';
 import { useQuery } from '@tanstack/vue-query';
 import { getAvailableCards } from 'src/services/api/cards';
 import type { Card } from 'src/models/cards';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineEmits<{
   ok: [card: Card];

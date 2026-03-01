@@ -2,21 +2,21 @@
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <q-card style="width: 90vw; max-width: 800px; max-height: 90vh">
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">Solicitar troca</div>
+        <div class="text-h6">{{ t('dialogs.createTrade') }}</div>
         <q-space />
         <q-btn icon="close" flat round dense @click="onDialogCancel" />
       </q-card-section>
 
       <q-card-section style="max-height: calc(90vh - 120px); overflow-y: auto">
         <q-tabs v-model="activeTab" class="text-grey-8">
-          <q-tab name="my-cards" label="Minhas cartas" />
-          <q-tab name="system-cards" label="Cartas do sistema" />
+          <q-tab name="my-cards" :label="t('tabs.myCards')" />
+          <q-tab name="system-cards" :label="t('tabs.systemCards')" />
         </q-tabs>
 
         <q-tab-panels v-model="activeTab" animated>
           <q-tab-panel name="my-cards">
             <div class="q-mt-md">
-              <div class="text-subtitle1 q-mb-md">Selecione as cartas que você quer oferecer:</div>
+              <div class="text-subtitle1 q-mb-md">{{ t('labels.youOffer') }}</div>
               <CardList
                 :cards="myCards"
                 :clickable="true"
@@ -30,7 +30,7 @@
 
           <q-tab-panel name="system-cards">
             <div class="q-mt-md">
-              <div class="text-subtitle1 q-mb-md">Selecione as cartas que você quer solicitar:</div>
+              <div class="text-subtitle1 q-mb-md">{{ t('labels.youRequest') }}</div>
               <div v-if="loadingSystemCards" class="text-center q-my-lg">
                 <q-spinner color="primary" size="2em" />
               </div>
@@ -48,7 +48,7 @@
                   v-if="systemCardsPage > 1"
                   flat
                   color="primary"
-                  label="Anterior"
+                  :label="t('buttons.previous')"
                   size="sm"
                   @click="loadCards(systemCardsPage - 1)"
                 />
@@ -56,7 +56,7 @@
                   v-if="hasMoreSystemCards"
                   flat
                   color="primary"
-                  label="Próxima"
+                  :label="t('buttons.next')"
                   size="sm"
                   @click="loadCards(systemCardsPage + 1)"
                 />
@@ -67,10 +67,10 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="Cancelar" @click="onDialogCancel" />
+        <q-btn flat :label="t('buttons.cancel')" @click="onDialogCancel" />
         <q-btn
           color="primary"
-          label="Solicitar troca"
+          :label="t('buttons.createTrade')"
           :disabled="selectedOfferedCards.length === 0 || selectedRequestedCards.length === 0"
           @click="submitTrade"
         />
@@ -87,6 +87,9 @@ import { getMyCards, getAvailableCards } from 'src/services/api/cards';
 import { createTrade } from 'src/services/api/trades';
 import CardList from 'src/components/CardList.vue';
 import type { Card } from 'src/models/cards';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineEmits<{
   ok: [];
