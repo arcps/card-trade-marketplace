@@ -1,11 +1,13 @@
 export default {
   nav: {
-    home: 'Início',
+    home: 'Mercado',
     myCards: 'Minhas Cartas',
     myTrades: 'Minhas Trocas',
     login: 'Entrar',
     register: 'Registrar',
     logout: 'Sair',
+    browse: 'Navegue pelo site',
+    myAccount: 'Minha conta',
   },
 
   pages: {

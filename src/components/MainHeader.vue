@@ -16,21 +16,13 @@
       <q-space />
 
       <div class="gt-sm row items-center no-wrap">
-        <q-btn
-          v-for="link in links"
-          :key="link.label"
-          stretch
-          flat
-          :icon="link.icon"
-          :label="link.label"
-          :to="link.to"
-        />
+        <q-btn stretch flat icon="storefront" :label="t('nav.home')" to="'/'" />
 
-        <q-separator vertical spaced v-if="links.length > 0" />
+        <q-separator vertical spaced />
 
         <template v-if="!authStore.isAuthenticated">
-          <q-btn stretch flat label="Entrar" to="/login" icon="login" />
-          <q-btn stretch flat label="Registrar" to="/register" icon="person_add" />
+          <q-btn stretch flat :label="t('nav.login')" to="/login" icon="login" />
+          <q-btn stretch flat :label="t('nav.register')" to="/register" icon="person_add" />
         </template>
 
         <q-btn-dropdown
@@ -75,10 +67,6 @@ import LanguageSelector from 'components/LanguageSelector.vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-
-defineProps<{
-  links: { label: string; icon: string; to: string }[];
-}>();
 
 defineEmits(['toggleLeftDrawer']);
 

@@ -1,11 +1,13 @@
 export default {
   nav: {
-    home: 'Home',
+    home: 'Market',
     myCards: 'My Cards',
     myTrades: 'My Trades',
     login: 'Login',
     register: 'Register',
     logout: 'Logout',
+    browse: 'Browse',
+    myAccount: 'My Account',
   },
 
   pages: {
