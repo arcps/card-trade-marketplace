@@ -16,7 +16,7 @@
       <q-space />
 
       <div class="gt-sm row items-center no-wrap">
-        <q-btn stretch flat icon="storefront" :label="t('nav.home')" to="'/'" />
+        <q-btn stretch flat icon="storefront" :label="t('nav.home')" to="/" />
 
         <q-separator vertical spaced />
 

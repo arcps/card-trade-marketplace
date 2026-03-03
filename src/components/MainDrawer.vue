@@ -2,7 +2,7 @@
   <q-list>
     <q-item-label header> {{ t('nav.browse') }} </q-item-label>
 
-    <q-item clickable v-ripple :to="'/'">
+    <q-item clickable v-ripple to="/">
       <q-item-section avatar>
         <q-icon :name="'storefront'" />
       </q-item-section>
