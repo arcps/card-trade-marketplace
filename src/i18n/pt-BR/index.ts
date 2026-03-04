@@ -68,4 +68,20 @@ export default {
     portuguese: 'Português',
     english: 'English',
   },
+
+  login: {
+    title: 'Faça login na sua conta',
+    email: 'E-mail',
+    name: 'Nome',
+    password: 'Senha',
+    signup: 'Criar conta',
+    submit: 'Entrar',
+    error: 'Email ou senha inválidos. Por favor, tente novamente.',
+    success: 'Login realizado com sucesso!',
+    typeEmail: 'Por favor, digite um email válido',
+    typePassword: 'Por favor, digite sua senha',
+    passwordMinLength: 'A senha deve conter pelo menos 6 caracteres',
+    signupSuccess: 'Registro realizado com sucesso! Você já pode fazer login.',
+    signupError: 'Erro ao registrar. Por favor, tente novamente.',
+  },
 };

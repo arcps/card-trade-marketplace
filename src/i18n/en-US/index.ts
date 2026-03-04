@@ -68,4 +68,20 @@ export default {
     portuguese: 'Português',
     english: 'English',
   },
+
+  login: {
+    title: 'Login to your account',
+    email: 'Email',
+    name: 'Name',
+    password: 'Password',
+    signup: 'Create an account',
+    submit: 'Login',
+    error: 'Invalid email or password. Please try again.',
+    success: 'Login successful!',
+    typeEmail: 'Please enter a valid email',
+    typePassword: 'Please enter your password',
+    passwordMinLength: 'The password must contain at least 6 characters',
+    signupSuccess: 'Signup successful! You can now login.',
+    signupError: 'Error signing up. Please try again.',
+  },
 };

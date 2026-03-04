@@ -2,7 +2,7 @@
   <q-page class="row items-center justify-center bg-grey-2">
     <q-card style="width: 100%; max-width: 400px">
       <q-card-section>
-        <div class="text-h6 text-center">Acesse sua conta</div>
+        <div class="text-h6 text-center">{{ t('login.title') }}</div>
       </q-card-section>
 
       <q-card-section>
@@ -10,27 +10,27 @@
           <q-input
             filled
             v-model="email"
-            label="Email"
+            :label="t('login.email')"
             type="email"
             lazy-rules
             :rules="[
-              (val) => (val && val.length > 0) || 'Por favor digite seu email',
-              (val) => /.+@.+\..+/.test(val) || 'Email inválido',
+              (val) => (val && val.length > 0) || t('login.typeEmail'),
+              (val) => /.+@.+\..+/.test(val) || t('login.typeEmail'),
             ]"
           />
 
           <q-input
             filled
             v-model="password"
-            label="Senha"
+            :label="t('login.password')"
             type="password"
             lazy-rules
-            :rules="[(val) => (val && val.length > 0) || 'Por favor digite sua senha']"
+            :rules="[(val) => (val && val.length > 0) || t('login.typePassword')]"
           />
 
           <div class="row justify-between items-center">
-            <q-btn label="Entrar" type="submit" color="primary" />
-            <q-btn to="/register" label="Criar conta" color="primary" flat />
+            <q-btn :label="t('login.submit')" type="submit" color="primary" />
+            <q-btn to="/register" :label="t('login.signup')" color="primary" flat />
           </div>
         </q-form>
       </q-card-section>
@@ -49,6 +49,9 @@ const router = useRouter();
 const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 async function onSubmit() {
   try {
@@ -60,7 +63,7 @@ async function onSubmit() {
       color: 'green-4',
       textColor: 'white',
       icon: 'cloud_done',
-      message: 'Login realizado com sucesso!',
+      message: t('login.success'),
     });
     await router.push('/');
   } catch (error) {
@@ -69,7 +72,7 @@ async function onSubmit() {
       color: 'red-5',
       textColor: 'white',
       icon: 'warning',
-      message: 'Email ou senha inválidos.',
+      message: t('login.error'),
     });
   }
 }

@@ -10,7 +10,7 @@
           <q-input
             filled
             v-model="name"
-            label="Nome Completo"
+            :label="t('login.name')"
             lazy-rules
             :rules="[(val) => (val && val.length > 0) || 'Por favor digite seu nome']"
           />
@@ -18,24 +18,24 @@
           <q-input
             filled
             v-model="email"
-            label="Email"
+            :label="t('login.email')"
             type="email"
             lazy-rules
             :rules="[
-              (val) => (val && val.length > 0) || 'Por favor digite seu email',
-              (val) => /.+@.+\..+/.test(val) || 'Email inválido',
+              (val) => (val && val.length > 0) || t('login.typeEmail'),
+              (val) => /.+@.+\..+/.test(val) || t('login.typeEmail'),
             ]"
           />
 
           <q-input
             filled
             v-model="password"
-            label="Senha"
+            :label="t('login.password')"
             type="password"
             lazy-rules
             :rules="[
-              (val) => (val && val.length > 0) || 'Por favor digite sua senha',
-              (val) => val.length >= 6 || 'A senha deve ter pelo menos 6 caracteres',
+              (val) => (val && val.length > 0) || t('login.typePassword'),
+              (val) => val.length >= 6 || t('login.typePassword'),
             ]"
           />
 
@@ -54,6 +54,9 @@ import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from 'src/stores/auth';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const $q = useQuasar();
 const router = useRouter();
@@ -73,7 +76,7 @@ async function onSubmit() {
       color: 'green-4',
       textColor: 'white',
       icon: 'cloud_done',
-      message: 'Cadastro realizado com sucesso',
+      message: t('login.signupSuccess'),
     });
     await router.push('/login');
   } catch (error) {
@@ -82,7 +85,7 @@ async function onSubmit() {
       color: 'red-5',
       textColor: 'white',
       icon: 'warning',
-      message: 'Erro ao realizar cadastro. Tente novamente.',
+      message: t('login.signupError'),
     });
   }
 }
