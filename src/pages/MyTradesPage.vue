@@ -14,104 +14,13 @@
     </div>
 
     <div v-else class="q-gutter-md">
-      <q-card v-for="trade in trades" :key="trade.id" class="q-mb-md" bordered>
-        <q-card-section class="bg-blue-grey-1">
-          <div class="row items-center">
-            <div class="text-h6">{{ t('labels.tradeId') }} #{{ trade.id.slice(-8) }}</div>
-            <q-space />
-            <div class="text-caption text-grey-7">
-              {{ formatDate(trade.createdAt) }}
-            </div>
-            <q-btn
-              flat
-              round
-              dense
-              icon="delete"
-              color="negative"
-              size="sm"
-              class="q-ml-sm"
-              @click="confirmDeleteTrade(trade.id)"
-            />
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section>
-          <div class="q-mb-lg">
-            <div class="row items-center q-mb-md">
-              <q-icon name="arrow_upward" color="positive" size="md" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-medium">{{ t('labels.offeredCards') }}</div>
-            </div>
-            <div class="row q-gutter-sm wrap">
-              <div v-for="card in getOfferedCards(trade)" :key="card.id" class="col-auto">
-                <q-card flat bordered class="trade-card">
-                  <q-img
-                    :src="card.imageUrl"
-                    :alt="card.name"
-                    style="width: 80px; height: 110px"
-                    fit="cover"
-                  >
-                    <template v-slot:error>
-                      <div class="full-width full-height flex flex-center bg-grey-3">
-                        <q-icon name="card_giftcard" size="2rem" color="grey-6" />
-                      </div>
-                    </template>
-                  </q-img>
-                  <q-card-section class="q-pa-xs">
-                    <div class="text-caption text-center text-weight-medium line-clamp-2">
-                      {{ card.name }}
-                    </div>
-                  </q-card-section>
-                </q-card>
-              </div>
-            </div>
-          </div>
-
-          <q-separator class="q-my-lg" />
-
-          <div class="q-mb-lg">
-            <div class="row items-center q-mb-md">
-              <q-icon name="arrow_downward" color="info" size="md" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-medium">{{ t('labels.requestedCards') }}</div>
-            </div>
-            <div class="row q-gutter-sm wrap">
-              <div v-for="card in getRequestedCards(trade)" :key="card.id" class="col-auto">
-                <q-card flat bordered class="trade-card">
-                  <q-img
-                    :src="card.imageUrl"
-                    :alt="card.name"
-                    style="width: 80px; height: 110px"
-                    fit="cover"
-                  >
-                    <template v-slot:error>
-                      <div class="full-width full-height flex flex-center bg-grey-3">
-                        <q-icon name="card_giftcard" size="2rem" color="grey-6" />
-                      </div>
-                    </template>
-                  </q-img>
-                  <q-card-section class="q-pa-xs">
-                    <div class="text-caption text-center text-weight-medium line-clamp-2">
-                      {{ card.name }}
-                    </div>
-                  </q-card-section>
-                </q-card>
-              </div>
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section class="bg-grey-1">
-          <div class="row items-center">
-            <q-icon name="person" size="sm" class="q-mr-sm" />
-            <div class="text-caption">
-              {{ t('labels.tradeBy') }}: <strong>{{ trade.user.name }}</strong>
-            </div>
-          </div>
-        </q-card-section>
-      </q-card>
+      <TradeCard
+        v-for="trade in trades"
+        :key="trade.id"
+        :trade="trade"
+        :canDelete="true"
+        @delete="confirmDeleteTrade"
+      />
 
       <div v-if="hasMore" class="flex justify-center q-mt-lg">
         <q-btn flat color="primary" :label="t('buttons.loadMore')" @click="loadMoreTrades" />
@@ -126,6 +35,7 @@ import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth';
 import { getTrades, deleteTrade } from 'src/services/api/trades';
 import CreateTradeDialog from 'src/components/dialogs/CreateTradeDialog.vue';
+import TradeCard from 'components/tradeCard.vue';
 import type { Trade } from 'src/services/api/trades';
 import { useI18n } from 'vue-i18n';
 
@@ -185,18 +95,6 @@ const openCreateTradeDialog = () => {
       console.error('Error refreshing trades:', error);
     });
   });
-};
-
-const getOfferedCards = (trade: Trade) => {
-  return trade.tradeCards.filter((tc) => tc.type === 'OFFERING').map((tc) => tc.card);
-};
-
-const getRequestedCards = (trade: Trade) => {
-  return trade.tradeCards.filter((tc) => tc.type === 'RECEIVING').map((tc) => tc.card);
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('pt-BR');
 };
 
 const confirmDeleteTrade = (tradeId: string) => {
